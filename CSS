@@ -1,0 +1,55 @@
+html, body{
+  margin:0;
+  padding:0;
+  height:100%;
+  overflow:hidden;
+  touch-action:none;
+  overscroll-behavior:none;
+  -webkit-user-select:none;
+  user-select:none;
+  background:linear-gradient(#3bb0ff,#79f2c0);
+  font-family:sans-serif;
+}
+
+canvas{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100vw;
+  height:100vh;
+}
+
+#score{
+  position:absolute;
+  top:20px;
+  left:20px;
+  font-size:30px;
+  color:white;
+  font-weight:bold;
+  z-index:10;
+}
+
+#credit{
+  position:absolute;
+  bottom:15px;
+  width:100%;
+  text-align:center;
+  color:white;
+  font-weight:bold;
+  font-size:18px;
+}
+
+#startBtn{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  padding:15px 35px;
+  font-size:22px;
+  background:orange;
+  border:none;
+  border-radius:12px;
+  color:white;
+  font-weight:bold;
+  z-index:10;
+}

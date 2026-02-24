@@ -1,4 +1,4 @@
-// Zoom hard block
+// Prevent zoom
 document.addEventListener("dblclick", e => e.preventDefault(), { passive:false });
 document.addEventListener("touchmove", function(e){
   if(e.touches.length > 1){
@@ -31,12 +31,13 @@ let birdObj, pipes, score;
 let gravity = 0.6;
 let gameStarted = false;
 let gameOver = false;
-let firstClick = true;
+let firstStage = true;   // controls first click
 
-function stopAll(){
+function stopAllSounds(){
   startSound.pause();
   runSound.pause();
   deathSound.pause();
+
   startSound.currentTime = 0;
   runSound.currentTime = 0;
   deathSound.currentTime = 0;
@@ -60,10 +61,12 @@ init();
 
 startBtn.addEventListener("click", ()=>{
 
-  if(firstClick){
-    firstClick = false;
+  // 🔵 FIRST CLICK → only play intro sound
+  if(firstStage){
+    firstStage = false;
 
-    startSound.loop = true;
+    stopAllSounds();
+
     startSound.currentTime = 0;
     startSound.play().catch(()=>{});
 
@@ -71,12 +74,14 @@ startBtn.addEventListener("click", ()=>{
     return;
   }
 
-  stopAll();
+  // 🟢 SECOND CLICK → start game
+  stopAllSounds();
 
   gameStarted = true;
   init();
 
   runSound.loop = true;
+  runSound.currentTime = 0;
   runSound.play().catch(()=>{});
 
   startBtn.style.display = "none";
@@ -110,7 +115,7 @@ function update(){
   birdObj.velocity += gravity;
   birdObj.y += birdObj.velocity;
 
-  if(birdObj.y + birdObj.height > canvas.height){
+  if(birdObj.y + birdObj.height > canvas.height || birdObj.y < 0){
     endGame();
   }
 
@@ -163,11 +168,15 @@ function endGame(){
   gameOver = true;
   gameStarted = false;
 
-  stopAll();
+  stopAllSounds();
+
+  deathSound.currentTime = 0;
   deathSound.play().catch(()=>{});
 
-  startBtn.innerText="RESTART";
-  startBtn.style.display="block";
+  startBtn.innerText = "RESTART";
+  startBtn.style.display = "block";
+
+  firstStage = true;   // reset system
 }
 
 function loop(){

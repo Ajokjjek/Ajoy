@@ -20,8 +20,7 @@ window.addEventListener("resize", ()=>{
 const startBtn = document.getElementById("startBtn");
 const scoreText = document.getElementById("score");
 
-const startSound = document.getElementById("startSound");
-const runSound = document.getElementById("runSound");
+const gameSound = document.getElementById("gameSound");
 const deathSound = document.getElementById("deathSound");
 
 let bird = new Image();
@@ -31,16 +30,6 @@ let birdObj, pipes, score;
 let gravity = 0.6;
 let gameStarted = false;
 let gameOver = false;
-let firstClick = true;
-
-function stopAll(){
-  startSound.pause();
-  runSound.pause();
-  deathSound.pause();
-  startSound.currentTime = 0;
-  runSound.currentTime = 0;
-  deathSound.currentTime = 0;
-}
 
 function init(){
   birdObj = {
@@ -60,24 +49,13 @@ init();
 
 startBtn.addEventListener("click", ()=>{
 
-  if(firstClick){
-    firstClick = false;
-
-    startSound.loop = true;
-    startSound.currentTime = 0;
-    startSound.play().catch(()=>{});
-
-    startBtn.innerText = "PLAY";
-    return;
-  }
-
-  stopAll();
-
   gameStarted = true;
+  gameOver = false;
   init();
 
-  runSound.loop = true;
-  runSound.play().catch(()=>{});
+  gameSound.loop = true;
+  gameSound.currentTime = 0;
+  gameSound.play().catch(()=>{});
 
   startBtn.style.display = "none";
 });
@@ -163,7 +141,10 @@ function endGame(){
   gameOver = true;
   gameStarted = false;
 
-  stopAll();
+  gameSound.pause();
+  gameSound.currentTime = 0;
+
+  deathSound.currentTime = 0;
   deathSound.play().catch(()=>{});
 
   startBtn.innerText="RESTART";

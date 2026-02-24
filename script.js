@@ -1,4 +1,4 @@
-  const canvas = document.getElementById("game");
+const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 canvas.width = window.innerWidth;
@@ -22,20 +22,21 @@ let pipes = [];
 let score = 0;
 let highScore = localStorage.getItem("highScore") || 0;
 
-let gravity = 0.55;
-let jumpPower = -11;
+let gravity = 0.45;
+let lift = -8.5;
+let maxFall = 9;
 
 let gameStarted = false;
 let gameOver = false;
-let firstStart = true;
+let introPlayed = false;
 
 function init(){
   birdObj = {
-    x:150,
-    y:canvas.height/2,
-    width:90,
-    height:90,
-    velocity:0
+    x: canvas.width * 0.25,
+    y: canvas.height / 2,
+    width: 80,
+    height: 80,
+    velocity: 0
   };
 
   pipes = [];
@@ -46,11 +47,17 @@ function init(){
 
 init();
 
-startBtn.onclick = ()=>{
+/* ---------- START BUTTON ---------- */
 
-  if(firstStart){
-    firstStart = false;
+startBtn.onclick = () => {
+
+  // First click → only intro sound
+  if(!introPlayed){
+    introPlayed = true;
+    startSound.currentTime = 0;
     startSound.play().catch(()=>{});
+    startBtn.innerText = "PLAY";
+    return;
   }
 
   startGame();
@@ -58,54 +65,68 @@ startBtn.onclick = ()=>{
 
 function startGame(){
 
+  startBtn.style.display = "none";
+
   runSound.currentTime = 0;
   runSound.loop = true;
   runSound.play().catch(()=>{});
 
   init();
   gameStarted = true;
-  startBtn.style.display="none";
 }
 
-canvas.addEventListener("click", jump);
+/* ---------- CONTROL ---------- */
+
 canvas.addEventListener("touchstart", jump, { passive:false });
+canvas.addEventListener("mousedown", jump);
 
 function jump(e){
   if(e) e.preventDefault();
   if(!gameStarted || gameOver) return;
-  birdObj.velocity = jumpPower;
+
+  birdObj.velocity = lift;
 }
 
+/* ---------- PIPE ---------- */
+
 function createPipe(){
-  let gap = 260;
+
+  let gap = 300;   // 🔥 gap বড়
   let topHeight = Math.random()*(canvas.height-gap-200)+100;
 
   pipes.push({
-    x:canvas.width + 200, // শুরুতে দূরে থাকবে
-    width:90,
-    top:topHeight,
-    bottom:topHeight+gap,
+    x: canvas.width + 150,
+    width: 110,
+    top: topHeight,
+    bottom: topHeight + gap,
     counted:false
   });
 }
+
+/* ---------- UPDATE ---------- */
 
 function update(){
 
   if(!gameStarted || gameOver) return;
 
   birdObj.velocity += gravity;
+
+  if(birdObj.velocity > maxFall){
+    birdObj.velocity = maxFall;
+  }
+
   birdObj.y += birdObj.velocity;
 
   if(birdObj.y + birdObj.height > canvas.height || birdObj.y < 0){
     endGame();
   }
 
-  if(pipes.length==0 || pipes[pipes.length-1].x < canvas.width-300){
+  if(pipes.length==0 || pipes[pipes.length-1].x < canvas.width-350){
     createPipe();
   }
 
   pipes.forEach(pipe=>{
-    pipe.x -= 4; // আগুন কাছে আসবে
+    pipe.x -= 3;   // 🔥 fire speed realistic
 
     if(!pipe.counted && pipe.x + pipe.width < birdObj.x){
       score++;
@@ -126,25 +147,33 @@ function update(){
   pipes = pipes.filter(p=>p.x+p.width>0);
 }
 
+/* ---------- DRAW ---------- */
+
 function draw(){
+
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
   pipes.forEach(pipe=>{
 
-    for(let y=0; y<pipe.top; y+=80){
-      ctx.drawImage(fireImg, pipe.x, y, pipe.width, 100);
-    }
-
-    for(let y=pipe.bottom; y<canvas.height; y+=80){
-      ctx.drawImage(fireImg, pipe.x, y, pipe.width, 100);
-    }
+    // 🔥 Realistic fire stretch
+    ctx.drawImage(fireImg, pipe.x, 0, pipe.width, pipe.top);
+    ctx.drawImage(fireImg, pipe.x, pipe.bottom, pipe.width, canvas.height - pipe.bottom);
 
   });
 
-  ctx.drawImage(bird,birdObj.x,birdObj.y,birdObj.width,birdObj.height);
+  // Bird rotation smooth
+  ctx.save();
+  let angle = birdObj.velocity * 0.05;
+  ctx.translate(birdObj.x + birdObj.width/2, birdObj.y + birdObj.height/2);
+  ctx.rotate(angle);
+  ctx.drawImage(bird, -birdObj.width/2, -birdObj.height/2, birdObj.width, birdObj.height);
+  ctx.restore();
 }
 
+/* ---------- GAME OVER ---------- */
+
 function endGame(){
+
   if(gameOver) return;
 
   gameOver = true;
@@ -156,17 +185,19 @@ function endGame(){
   deathSound.currentTime = 0;
   deathSound.play().catch(()=>{});
 
-  // High Score Update
   if(score > highScore){
     highScore = score;
     localStorage.setItem("highScore", highScore);
   }
 
-  alert("Game Over\nScore: " + score + "\nHigh Score: " + highScore);
-
-  startBtn.innerText="RESTART";
-  startBtn.style.display="block";
+  setTimeout(()=>{
+    alert("Game Over\nScore: "+score+"\nHigh Score: "+highScore);
+    startBtn.innerText = "RESTART";
+    startBtn.style.display = "block";
+  }, 200);
 }
+
+/* ---------- LOOP ---------- */
 
 function loop(){
   update();

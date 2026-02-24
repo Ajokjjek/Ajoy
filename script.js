@@ -1,11 +1,3 @@
-// Prevent zoom
-document.addEventListener("dblclick", e => e.preventDefault(), { passive:false });
-document.addEventListener("touchmove", function(e){
-  if(e.touches.length > 1){
-    e.preventDefault();
-  }
-}, { passive:false });
-
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
@@ -27,17 +19,18 @@ const deathSound = document.getElementById("deathSound");
 let bird = new Image();
 bird.src = "https://i.ibb.co/mCkRgpQK/1000096379-removebg-preview.png";
 
-let birdObj, pipes, score;
+let birdObj;
+let pipes = [];
+let score = 0;
 let gravity = 0.6;
 let gameStarted = false;
 let gameOver = false;
-let firstStage = true;   // controls first click
+let introPlayed = false;
 
-function stopAllSounds(){
+function stopAll(){
   startSound.pause();
   runSound.pause();
   deathSound.pause();
-
   startSound.currentTime = 0;
   runSound.currentTime = 0;
   deathSound.currentTime = 0;
@@ -47,8 +40,8 @@ function init(){
   birdObj = {
     x:150,
     y:canvas.height/2,
-    width:100,
-    height:100,
+    width:90,
+    height:90,
     velocity:0
   };
   pipes = [];
@@ -61,48 +54,36 @@ init();
 
 startBtn.addEventListener("click", ()=>{
 
-  // 🔵 FIRST CLICK → only play intro sound
-  if(firstStage){
-    firstStage = false;
-
-    stopAllSounds();
-
-    startSound.currentTime = 0;
+  if(!introPlayed){
+    introPlayed = true;
+    stopAll();
     startSound.play().catch(()=>{});
-
     startBtn.innerText = "PLAY";
     return;
   }
 
-  // 🟢 SECOND CLICK → start game
-  stopAllSounds();
-
-  gameStarted = true;
+  stopAll();
   init();
+  gameStarted = true;
 
   runSound.loop = true;
-  runSound.currentTime = 0;
   runSound.play().catch(()=>{});
 
   startBtn.style.display = "none";
 });
 
-canvas.addEventListener("click", jump);
-canvas.addEventListener("touchstart", jump, { passive:false });
-
-function jump(e){
-  e.preventDefault();
+canvas.addEventListener("click", ()=>{
   if(!gameStarted || gameOver) return;
   birdObj.velocity = -12;
-}
+});
 
 function createPipe(){
-  let gap = 320;
-  let topHeight = Math.random()*(canvas.height-gap-200)+100;
+  let gap = 280;
+  let topHeight = Math.random()*(canvas.height-gap-150)+75;
 
   pipes.push({
     x:canvas.width,
-    width:130,
+    width:110,
     top:topHeight,
     bottom:topHeight+gap,
     counted:false
@@ -119,7 +100,7 @@ function update(){
     endGame();
   }
 
-  if(pipes.length==0 || pipes[pipes.length-1].x < canvas.width-400){
+  if(pipes.length==0 || pipes[pipes.length-1].x < canvas.width-350){
     createPipe();
   }
 
@@ -168,15 +149,12 @@ function endGame(){
   gameOver = true;
   gameStarted = false;
 
-  stopAllSounds();
-
-  deathSound.currentTime = 0;
+  stopAll();
   deathSound.play().catch(()=>{});
 
   startBtn.innerText = "RESTART";
   startBtn.style.display = "block";
-
-  firstStage = true;   // reset system
+  introPlayed = false;
 }
 
 function loop(){

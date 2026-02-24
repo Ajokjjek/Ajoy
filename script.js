@@ -4,6 +4,11 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+window.addEventListener("resize", () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+
 const startBtn = document.getElementById("startBtn");
 const scoreText = document.getElementById("score");
 
@@ -30,9 +35,8 @@ let gameStarted = false;
 let gameOver = false;
 
 let introPlayed = false;
-let readyToStart = false;
 
-/* ---------- INIT ---------- */
+/* ================= INIT ================= */
 
 function init(){
   birdObj = {
@@ -51,14 +55,13 @@ function init(){
 
 init();
 
-/* ---------- START BUTTON ---------- */
+/* ================= START BUTTON ================= */
 
 startBtn.onclick = () => {
 
-  // First click → only intro sound
+  // First click → intro sound only
   if(!introPlayed){
     introPlayed = true;
-    readyToStart = true;
 
     introSound.currentTime = 0;
     introSound.play().catch(()=>{});
@@ -67,17 +70,16 @@ startBtn.onclick = () => {
     return;
   }
 
-  // Second click → start game
-  if(readyToStart){
-    readyToStart = false;
-    startGame();
-  }
+  startGame();
 };
 
 function startGame(){
 
   init();
+
   gameStarted = true;
+  gameOver = false;
+
   startBtn.style.display = "none";
 
   runSound.currentTime = 0;
@@ -85,7 +87,7 @@ function startGame(){
   runSound.play().catch(()=>{});
 }
 
-/* ---------- CONTROL ---------- */
+/* ================= CONTROL ================= */
 
 canvas.addEventListener("touchstart", jump, { passive:false });
 canvas.addEventListener("mousedown", jump);
@@ -96,7 +98,7 @@ function jump(e){
   birdObj.velocity = lift;
 }
 
-/* ---------- PIPE ---------- */
+/* ================= PIPE ================= */
 
 function createPipe(){
 
@@ -112,7 +114,7 @@ function createPipe(){
   });
 }
 
-/* ---------- UPDATE ---------- */
+/* ================= UPDATE ================= */
 
 function update(){
 
@@ -153,7 +155,7 @@ function update(){
   pipes = pipes.filter(p=>p.x+p.width>0);
 }
 
-/* ---------- DRAW ---------- */
+/* ================= DRAW ================= */
 
 function draw(){
 
@@ -174,7 +176,7 @@ function draw(){
   ctx.restore();
 }
 
-/* ---------- GAME OVER ---------- */
+/* ================= GAME OVER ================= */
 
 function endGame(){
 
@@ -194,14 +196,11 @@ function endGame(){
     localStorage.setItem("highScore", highScore);
   }
 
-  setTimeout(()=>{
-    alert("Game Over\nScore: "+score+"\nHigh Score: "+highScore);
-    startBtn.innerText = "RESTART";
-    startBtn.style.display = "block";
-  },200);
+  startBtn.innerText = "RESTART";
+  startBtn.style.display = "block";
 }
 
-/* ---------- LOOP ---------- */
+/* ================= LOOP ================= */
 
 function loop(){
   update();

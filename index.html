@@ -5,9 +5,11 @@
 <meta name="viewport"
 content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Flappy Fire</title>
+
 <link rel="stylesheet" href="style.css">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#000000">
+
 </head>
 
 <body>
@@ -22,5 +24,13 @@ content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable
 <audio id="deathSound" src="https://files.catbox.moe/rnigu3.mp3"></audio>
 
 <script src="script.js"></script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js")
+    .then(() => console.log("Service Worker Registered"));
+}
+</script>
+
 </body>
 </html>

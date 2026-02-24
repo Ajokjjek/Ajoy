@@ -1,13 +1,22 @@
-body{
+html, body{
   margin:0;
+  padding:0;
+  height:100%;
   overflow:hidden;
   touch-action:none;
+  overscroll-behavior:none;
+  -webkit-user-select:none;
+  user-select:none;
   background:linear-gradient(#3bb0ff,#79f2c0);
   font-family:sans-serif;
 }
 
 canvas{
-  display:block;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100vw;
+  height:100vh;
 }
 
 #score{

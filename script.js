@@ -1,4 +1,4 @@
-const canvas = document.getElementById("game");
+  const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 canvas.width = window.innerWidth;
@@ -20,9 +20,10 @@ fireImg.src = "https://files.catbox.moe/n0np9l.png";
 let birdObj;
 let pipes = [];
 let score = 0;
+let highScore = localStorage.getItem("highScore") || 0;
 
 let gravity = 0.55;
-let jumpPower = -10;
+let jumpPower = -11;
 
 let gameStarted = false;
 let gameOver = false;
@@ -30,12 +31,13 @@ let firstStart = true;
 
 function init(){
   birdObj = {
-    x:120,
+    x:150,
     y:canvas.height/2,
-    width:85,
-    height:85,
+    width:90,
+    height:90,
     velocity:0
   };
+
   pipes = [];
   score = 0;
   scoreText.innerText = "0";
@@ -51,17 +53,22 @@ startBtn.onclick = ()=>{
     startSound.play().catch(()=>{});
   }
 
-  runSound.loop = true;
+  startGame();
+};
+
+function startGame(){
+
   runSound.currentTime = 0;
+  runSound.loop = true;
   runSound.play().catch(()=>{});
 
   init();
   gameStarted = true;
   startBtn.style.display="none";
-};
+}
 
-canvas.addEventListener("touchstart", jump, { passive:false });
 canvas.addEventListener("click", jump);
+canvas.addEventListener("touchstart", jump, { passive:false });
 
 function jump(e){
   if(e) e.preventDefault();
@@ -74,7 +81,7 @@ function createPipe(){
   let topHeight = Math.random()*(canvas.height-gap-200)+100;
 
   pipes.push({
-    x:canvas.width,
+    x:canvas.width + 200, // শুরুতে দূরে থাকবে
     width:90,
     top:topHeight,
     bottom:topHeight+gap,
@@ -98,7 +105,7 @@ function update(){
   }
 
   pipes.forEach(pipe=>{
-    pipe.x -= 3.5;
+    pipe.x -= 4; // আগুন কাছে আসবে
 
     if(!pipe.counted && pipe.x + pipe.width < birdObj.x){
       score++;
@@ -124,12 +131,10 @@ function draw(){
 
   pipes.forEach(pipe=>{
 
-    // Top fire
     for(let y=0; y<pipe.top; y+=80){
       ctx.drawImage(fireImg, pipe.x, y, pipe.width, 100);
     }
 
-    // Bottom fire
     for(let y=pipe.bottom; y<canvas.height; y+=80){
       ctx.drawImage(fireImg, pipe.x, y, pipe.width, 100);
     }
@@ -150,6 +155,14 @@ function endGame(){
 
   deathSound.currentTime = 0;
   deathSound.play().catch(()=>{});
+
+  // High Score Update
+  if(score > highScore){
+    highScore = score;
+    localStorage.setItem("highScore", highScore);
+  }
+
+  alert("Game Over\nScore: " + score + "\nHigh Score: " + highScore);
 
   startBtn.innerText="RESTART";
   startBtn.style.display="block";

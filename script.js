@@ -33,7 +33,6 @@ let maxFall = 9;
 
 let gameStarted = false;
 let gameOver = false;
-
 let introPlayed = false;
 
 /* ================= INIT ================= */
@@ -70,6 +69,7 @@ startBtn.onclick = () => {
     return;
   }
 
+  // Play or Restart
   startGame();
 };
 
@@ -82,6 +82,7 @@ function startGame(){
 
   startBtn.style.display = "none";
 
+  runSound.pause();
   runSound.currentTime = 0;
   runSound.loop = true;
   runSound.play().catch(()=>{});
@@ -106,7 +107,7 @@ function createPipe(){
   let topHeight = Math.random()*(canvas.height-gap-200)+100;
 
   pipes.push({
-    x: canvas.width + 200,
+    x: canvas.width + 100,
     width: 100,
     top: topHeight,
     bottom: topHeight + gap,

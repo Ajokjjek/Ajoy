@@ -7,7 +7,7 @@ canvas.height = window.innerHeight;
 const startBtn = document.getElementById("startBtn");
 const scoreText = document.getElementById("score");
 
-const startSound = document.getElementById("startSound");
+const introSound = document.getElementById("introSound");
 const runSound = document.getElementById("runSound");
 const deathSound = document.getElementById("deathSound");
 
@@ -22,13 +22,17 @@ let pipes = [];
 let score = 0;
 let highScore = localStorage.getItem("highScore") || 0;
 
-let gravity = 0.45;
-let lift = -8.5;
+let gravity = 0.5;
+let lift = -9;
 let maxFall = 9;
 
 let gameStarted = false;
 let gameOver = false;
+
 let introPlayed = false;
+let readyToStart = false;
+
+/* ---------- INIT ---------- */
 
 function init(){
   birdObj = {
@@ -54,25 +58,31 @@ startBtn.onclick = () => {
   // First click → only intro sound
   if(!introPlayed){
     introPlayed = true;
-    startSound.currentTime = 0;
-    startSound.play().catch(()=>{});
+    readyToStart = true;
+
+    introSound.currentTime = 0;
+    introSound.play().catch(()=>{});
+
     startBtn.innerText = "PLAY";
     return;
   }
 
-  startGame();
+  // Second click → start game
+  if(readyToStart){
+    readyToStart = false;
+    startGame();
+  }
 };
 
 function startGame(){
 
+  init();
+  gameStarted = true;
   startBtn.style.display = "none";
 
   runSound.currentTime = 0;
   runSound.loop = true;
   runSound.play().catch(()=>{});
-
-  init();
-  gameStarted = true;
 }
 
 /* ---------- CONTROL ---------- */
@@ -83,7 +93,6 @@ canvas.addEventListener("mousedown", jump);
 function jump(e){
   if(e) e.preventDefault();
   if(!gameStarted || gameOver) return;
-
   birdObj.velocity = lift;
 }
 
@@ -91,12 +100,12 @@ function jump(e){
 
 function createPipe(){
 
-  let gap = 300;   // 🔥 gap বড়
+  let gap = 280;
   let topHeight = Math.random()*(canvas.height-gap-200)+100;
 
   pipes.push({
-    x: canvas.width + 150,
-    width: 110,
+    x: canvas.width + 200,
+    width: 100,
     top: topHeight,
     bottom: topHeight + gap,
     counted:false
@@ -110,10 +119,7 @@ function update(){
   if(!gameStarted || gameOver) return;
 
   birdObj.velocity += gravity;
-
-  if(birdObj.velocity > maxFall){
-    birdObj.velocity = maxFall;
-  }
+  if(birdObj.velocity > maxFall) birdObj.velocity = maxFall;
 
   birdObj.y += birdObj.velocity;
 
@@ -126,7 +132,7 @@ function update(){
   }
 
   pipes.forEach(pipe=>{
-    pipe.x -= 3;   // 🔥 fire speed realistic
+    pipe.x -= 3;
 
     if(!pipe.counted && pipe.x + pipe.width < birdObj.x){
       score++;
@@ -154,19 +160,17 @@ function draw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
   pipes.forEach(pipe=>{
-
-    // 🔥 Realistic fire stretch
     ctx.drawImage(fireImg, pipe.x, 0, pipe.width, pipe.top);
-    ctx.drawImage(fireImg, pipe.x, pipe.bottom, pipe.width, canvas.height - pipe.bottom);
-
+    ctx.drawImage(fireImg, pipe.x, pipe.bottom, pipe.width,
+                  canvas.height - pipe.bottom);
   });
 
-  // Bird rotation smooth
   ctx.save();
   let angle = birdObj.velocity * 0.05;
   ctx.translate(birdObj.x + birdObj.width/2, birdObj.y + birdObj.height/2);
   ctx.rotate(angle);
-  ctx.drawImage(bird, -birdObj.width/2, -birdObj.height/2, birdObj.width, birdObj.height);
+  ctx.drawImage(bird, -birdObj.width/2, -birdObj.height/2,
+                birdObj.width, birdObj.height);
   ctx.restore();
 }
 
@@ -194,7 +198,7 @@ function endGame(){
     alert("Game Over\nScore: "+score+"\nHigh Score: "+highScore);
     startBtn.innerText = "RESTART";
     startBtn.style.display = "block";
-  }, 200);
+  },200);
 }
 
 /* ---------- LOOP ---------- */

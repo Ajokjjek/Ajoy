@@ -4,17 +4,30 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-window.addEventListener("resize", () => {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-});
+/* ================= SCORE ELEMENT SAFE LOAD ================= */
+
+let scoreText = document.getElementById("score");
+
+if(!scoreText){
+  scoreText = document.createElement("div");
+  scoreText.id = "score";
+  scoreText.style.position = "absolute";
+  scoreText.style.top = "20px";
+  scoreText.style.left = "20px";
+  scoreText.style.color = "white";
+  scoreText.style.fontSize = "22px";
+  scoreText.style.fontWeight = "bold";
+  document.body.appendChild(scoreText);
+}
+
+/* ================= AUDIO ================= */
 
 const startBtn = document.getElementById("startBtn");
-const scoreText = document.getElementById("score");
-
 const introSound = document.getElementById("introSound");
 const runSound = document.getElementById("runSound");
 const deathSound = document.getElementById("deathSound");
+
+/* ================= IMAGES ================= */
 
 let bird = new Image();
 bird.src = "https://i.ibb.co/mCkRgpQK/1000096379-removebg-preview.png";
@@ -25,11 +38,7 @@ fireImg.src = "https://files.catbox.moe/n0np9l.png";
 /* ================= SCORE SYSTEM ================= */
 
 let highScore = localStorage.getItem("highScore");
-if(highScore === null){
-  highScore = 0;
-}else{
-  highScore = parseInt(highScore);
-}
+highScore = highScore ? parseInt(highScore) : 0;
 
 let score = 0;
 
@@ -60,10 +69,9 @@ function init(){
 
   pipes = [];
   score = 0;
+  gameOver = false;
 
   scoreText.innerText = "Score: 0 | High: " + highScore;
-
-  gameOver = false;
 }
 
 init();
@@ -72,13 +80,10 @@ init();
 
 startBtn.onclick = () => {
 
-  // First click → intro sound only
   if(!introPlayed){
     introPlayed = true;
-
     introSound.currentTime = 0;
     introSound.play().catch(()=>{});
-
     startBtn.innerText = "PLAY";
     return;
   }

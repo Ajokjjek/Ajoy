@@ -1,4 +1,4 @@
-// Zoom hard block
+// Prevent zoom
 document.addEventListener("dblclick", e => e.preventDefault(), { passive:false });
 document.addEventListener("touchmove", function(e){
   if(e.touches.length > 1){
@@ -26,7 +26,9 @@ const deathSound = document.getElementById("deathSound");
 let bird = new Image();
 bird.src = "https://i.ibb.co/mCkRgpQK/1000096379-removebg-preview.png";
 
-let birdObj, pipes, score;
+let birdObj;
+let pipes = [];
+let score = 0;
 let gravity = 0.6;
 let gameStarted = false;
 let gameOver = false;
@@ -48,9 +50,7 @@ function init(){
 init();
 
 startBtn.addEventListener("click", ()=>{
-
   gameStarted = true;
-  gameOver = false;
   init();
 
   gameSound.loop = true;
@@ -70,12 +70,12 @@ function jump(e){
 }
 
 function createPipe(){
-  let gap = 320;
+  let gap = 300;
   let topHeight = Math.random()*(canvas.height-gap-200)+100;
 
   pipes.push({
     x:canvas.width,
-    width:130,
+    width:120,
     top:topHeight,
     bottom:topHeight+gap,
     counted:false
@@ -88,11 +88,11 @@ function update(){
   birdObj.velocity += gravity;
   birdObj.y += birdObj.velocity;
 
-  if(birdObj.y + birdObj.height > canvas.height){
+  if(birdObj.y + birdObj.height > canvas.height || birdObj.y < 0){
     endGame();
   }
 
-  if(pipes.length==0 || pipes[pipes.length-1].x < canvas.width-400){
+  if(pipes.length==0 || pipes[pipes.length-1].x < canvas.width-350){
     createPipe();
   }
 

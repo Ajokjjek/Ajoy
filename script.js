@@ -22,10 +22,21 @@ bird.src = "https://i.ibb.co/mCkRgpQK/1000096379-removebg-preview.png";
 let fireImg = new Image();
 fireImg.src = "https://files.catbox.moe/n0np9l.png";
 
+/* ================= SCORE SYSTEM ================= */
+
+let highScore = localStorage.getItem("highScore");
+if(highScore === null){
+  highScore = 0;
+}else{
+  highScore = parseInt(highScore);
+}
+
+let score = 0;
+
+/* ================= GAME STATE ================= */
+
 let birdObj;
 let pipes = [];
-let score = 0;
-let highScore = localStorage.getItem("highScore") || 0;
 
 let gravity = 0.5;
 let lift = -9;
@@ -38,6 +49,7 @@ let introPlayed = false;
 /* ================= INIT ================= */
 
 function init(){
+
   birdObj = {
     x: canvas.width * 0.25,
     y: canvas.height / 2,
@@ -48,7 +60,9 @@ function init(){
 
   pipes = [];
   score = 0;
-  scoreText.innerText = "0";
+
+  scoreText.innerText = "Score: 0 | High: " + highScore;
+
   gameOver = false;
 }
 
@@ -69,7 +83,6 @@ startBtn.onclick = () => {
     return;
   }
 
-  // Play or Restart
   startGame();
 };
 
@@ -139,8 +152,14 @@ function update(){
 
     if(!pipe.counted && pipe.x + pipe.width < birdObj.x){
       score++;
-      scoreText.innerText = score;
       pipe.counted = true;
+
+      if(score > highScore){
+        highScore = score;
+        localStorage.setItem("highScore", highScore);
+      }
+
+      scoreText.innerText = "Score: " + score + " | High: " + highScore;
     }
 
     if(
@@ -191,11 +210,6 @@ function endGame(){
 
   deathSound.currentTime = 0;
   deathSound.play().catch(()=>{});
-
-  if(score > highScore){
-    highScore = score;
-    localStorage.setItem("highScore", highScore);
-  }
 
   startBtn.innerText = "RESTART";
   startBtn.style.display = "block";
